@@ -1,5 +1,7 @@
 package com.amd.efishery.assignment.di
 
+import com.amd.efishery.assignment.BuildConfig
+import com.amd.efishery.assignment.data.remote.ApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,16 +35,16 @@ class NetworkModule {
     @Provides
     internal fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("")
+            .baseUrl(BuildConfig.base_url)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-//    @Singleton
-//    @Provides
-//    internal fun provideService(retrofit: Retrofit): ApiService {
-//        return retrofit.create(ApiService::class.java)
-//    }
+    @Singleton
+    @Provides
+    internal fun provideService(retrofit: Retrofit): ApiService {
+        return retrofit.create(ApiService::class.java)
+    }
 
 }

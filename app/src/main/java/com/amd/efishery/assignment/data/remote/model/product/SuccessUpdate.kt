@@ -1,4 +1,4 @@
-package com.amd.efishery.assignment.data.remote.model
+package com.amd.efishery.assignment.data.remote.model.product
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName

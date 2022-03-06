@@ -1,4 +1,4 @@
-package com.amd.efishery.assignment.data.remote.model
+package com.amd.efishery.assignment.data.remote.model.size
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
@@ -8,5 +8,5 @@ import kotlinx.parcelize.Parcelize
 data class OptionSize(
 
 	@field:SerializedName("size")
-	val size: String? = null
+	val size: Int? = null
 ) : Parcelable
