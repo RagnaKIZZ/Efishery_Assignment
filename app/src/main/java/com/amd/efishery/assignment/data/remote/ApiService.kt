@@ -1,6 +1,6 @@
 package com.amd.efishery.assignment.data.remote
 
-import com.amd.efishery.assignment.data.remote.model.*
+import com.amd.efishery.assignment.data.remote.model.product.*
 import com.amd.efishery.assignment.utils.Url
 import retrofit2.http.*
 
