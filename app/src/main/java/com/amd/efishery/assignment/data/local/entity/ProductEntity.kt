@@ -1,11 +1,11 @@
-package com.amd.efishery.assignment.data.remote.model
+package com.amd.efishery.assignment.data.local.entity
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class SearchProductParam(
+data class ProductEntity(
 
 	@field:SerializedName("size")
 	val size: String? = null,
