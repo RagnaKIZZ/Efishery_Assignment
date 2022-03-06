@@ -5,6 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.amd.efishery.assignment.BuildConfig
+import com.amd.efishery.assignment.data.local.dao.OptionAreaDao
+import com.amd.efishery.assignment.data.local.dao.OptionSizeDao
+import com.amd.efishery.assignment.data.local.dao.ProductDao
 
 @Database(
     entities = [ProductEntity::class, OptionAreaEntity::class, OptionSizeEntity::class],
@@ -12,6 +15,10 @@ import com.amd.efishery.assignment.BuildConfig
     exportSchema = false
 )
 abstract class LocalDb : RoomDatabase() {
+
+    abstract fun productDao() : ProductDao
+    abstract fun sizeDao() : OptionSizeDao
+    abstract fun areaDao() : OptionAreaDao
 
     companion object {
         @Volatile

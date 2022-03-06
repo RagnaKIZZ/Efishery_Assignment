@@ -7,13 +7,13 @@ import retrofit2.http.*
 interface ApiService {
 
     @GET(Url.LIST)
-    suspend fun getListProduct(
-        @Query("limit") limit: Int = 10,
-        @Query("offset") offset: Int = 0
+    suspend fun getProducts(
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int
     ) : List<ProductItem>
 
     @GET(Url.LIST)
-    suspend fun searchListProduct(
+    suspend fun searchProducts(
         @Query("search") params: String
     ) : List<ProductItem>
 

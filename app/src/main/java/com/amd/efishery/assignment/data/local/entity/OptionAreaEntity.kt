@@ -9,10 +9,7 @@ import kotlinx.parcelize.Parcelize
 @Entity
 @Parcelize
 data class OptionAreaEntity(
-
-    val province: String? = null,
-
+    var province: String? = null,
     @PrimaryKey
-    val city: String
-
+    var city: String
 ) : Parcelable

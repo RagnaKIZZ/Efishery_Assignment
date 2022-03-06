@@ -1,33 +1,31 @@
 package com.amd.efishery.assignment.data.local.entity
 
 import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import java.util.*
 
+@Entity
 @Parcelize
 data class ProductEntity(
 
-	@field:SerializedName("size")
-	val size: String? = null,
+    var size: String? = null,
 
-	@field:SerializedName("price")
-	val price: String? = null,
+    var price: String? = null,
 
-	@field:SerializedName("komoditas")
-	val komoditas: String? = null,
+    var komoditas: String? = null,
 
-	@field:SerializedName("uuid")
-	val uuid: String? = null,
+    @PrimaryKey
+    var uuid: String = UUID.randomUUID().toString(),
 
-	@field:SerializedName("tgl_parsed")
-	val tglParsed: String? = null,
+    var tglParsed: String? = null,
 
-	@field:SerializedName("area_provinsi")
-	val areaProvinsi: String? = null,
+    var areaProvinsi: String? = null,
 
-	@field:SerializedName("area_kota")
-	val areaKota: String? = null,
+    var areaKota: String? = null,
 
-	@field:SerializedName("timestamp")
-	val timestamp: String? = null
+    var timestamp: String? = null
+
 ) : Parcelable

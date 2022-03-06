@@ -10,5 +10,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class OptionSizeEntity(
 	@PrimaryKey
-	val size:
+	var size: Int
 ) : Parcelable
