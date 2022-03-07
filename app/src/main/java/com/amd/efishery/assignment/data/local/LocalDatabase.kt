@@ -1,4 +1,4 @@
-package com.amd.efishery.assignment.data.local.entity
+package com.amd.efishery.assignment.data.local
 
 import android.content.Context
 import androidx.room.Database
@@ -8,17 +8,23 @@ import com.amd.efishery.assignment.BuildConfig
 import com.amd.efishery.assignment.data.local.dao.OptionAreaDao
 import com.amd.efishery.assignment.data.local.dao.OptionSizeDao
 import com.amd.efishery.assignment.data.local.dao.ProductDao
+import com.amd.efishery.assignment.data.local.dao.RemoteKeyDao
+import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
+import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
+import com.amd.efishery.assignment.data.local.entity.ProductEntity
+import com.amd.efishery.assignment.data.local.entity.RemoteKey
 
 @Database(
-    entities = [ProductEntity::class, OptionAreaEntity::class, OptionSizeEntity::class],
-    version = 1,
+    entities = [ProductEntity::class, OptionAreaEntity::class, OptionSizeEntity::class, RemoteKey::class],
+    version = 2,
     exportSchema = false
 )
 abstract class LocalDb : RoomDatabase() {
 
-    abstract fun productDao() : ProductDao
-    abstract fun sizeDao() : OptionSizeDao
-    abstract fun areaDao() : OptionAreaDao
+    abstract fun productDao(): ProductDao
+    abstract fun sizeDao(): OptionSizeDao
+    abstract fun areaDao(): OptionAreaDao
+    abstract fun remoteKeyDao(): RemoteKeyDao
 
     companion object {
         @Volatile

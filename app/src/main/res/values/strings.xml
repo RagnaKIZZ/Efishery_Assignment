@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Efishery Assignment</string>
+    <string name="title_try_again">Try Again</string>
+    <string name="insert_product_name">Masukan Nama Produk</string>
+    <string name="select_province">Pilih provinsi</string>
+    <string name="select_city">Pilih Kota</string>
+    <string name="select_size">Pilih Ukuran</string>
+    <string name="add">Tambah</string>
 </resources>

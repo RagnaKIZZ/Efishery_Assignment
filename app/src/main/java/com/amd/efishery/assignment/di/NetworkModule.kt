@@ -21,7 +21,9 @@ class NetworkModule {
     @Provides
     internal fun provideOkHttpClient(): OkHttpClient {
         val logging =
-            HttpLoggingInterceptor().also { it.setLevel(HttpLoggingInterceptor.Level.BASIC) }
+            HttpLoggingInterceptor().also {
+                it.setLevel(HttpLoggingInterceptor.Level.BODY)
+            }
         return OkHttpClient.Builder().apply {
             addInterceptor(logging)
             connectTimeout(1, TimeUnit.MINUTES)

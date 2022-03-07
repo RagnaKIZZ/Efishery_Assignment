@@ -1,14 +1,13 @@
 package com.amd.efishery.assignment.di
 
 import android.content.Context
-import com.amd.efishery.assignment.data.ProductRepositoryImpl
+import com.amd.efishery.assignment.data.EfisheryRepositoryImpl
 import com.amd.efishery.assignment.data.local.LocalDataSource
 import com.amd.efishery.assignment.data.local.LocalDataSourceImpl
-import com.amd.efishery.assignment.data.local.entity.LocalDb
+import com.amd.efishery.assignment.data.local.LocalDb
 import com.amd.efishery.assignment.data.remote.ApiService
 import com.amd.efishery.assignment.data.remote.RemoteDataSource
 import com.amd.efishery.assignment.data.remote.RemoteDataSourceImpl
-import com.amd.efishery.assignment.domain.ProductRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,7 +28,7 @@ class RepositoryModule {
     internal fun provideRemoteDataSource(
         apiService: ApiService,
         dispatcherThread: DispatcherThread
-    ): RemoteDataSource {
+    ): RemoteDataSourceImpl {
         return RemoteDataSourceImpl(apiService, dispatcherThread)
     }
 
@@ -38,7 +37,7 @@ class RepositoryModule {
     internal fun provideLocalDataSource(
         localDb: LocalDb,
         dispatcherThread: DispatcherThread
-    ): LocalDataSource {
+    ): LocalDataSourceImpl {
         return LocalDataSourceImpl(localDb, dispatcherThread)
     }
 
@@ -47,8 +46,8 @@ class RepositoryModule {
     internal fun provideRepository(
         localDataSource: LocalDataSource,
         remoteDataSource: RemoteDataSource
-    ): ProductRepository {
-        return ProductRepositoryImpl(localDataSource, remoteDataSource)
+    ): EfisheryRepositoryImpl {
+        return EfisheryRepositoryImpl(localDataSource, remoteDataSource)
     }
 
 }
