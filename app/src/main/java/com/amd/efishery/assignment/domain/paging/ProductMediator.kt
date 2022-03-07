@@ -6,7 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.amd.efishery.assignment.data.local.LocalDataSource
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
+import com.amd.efishery.assignment.data.local.entity.RemoteKey
 import com.amd.efishery.assignment.data.remote.RemoteDataSource
+import com.amd.efishery.assignment.domain.mapper.toEntity
 import com.amd.efishery.assignment.utils.Constants
 import com.amd.efishery.assignment.utils.logging
 import retrofit2.HttpException
@@ -60,20 +62,42 @@ class ProductMediator(
     ): Any {
         return when (loadType) {
             LoadType.REFRESH -> {
-                val remoteKeys = localDataSource.getRemoteKeyClosestToCurrentPosition(state)
+                val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
                 remoteKeys?.nextKey?.minus(10) ?: Constants.INITIAL_OFFSET_PAGE
             }
             LoadType.APPEND -> {
-                val remoteKeys = localDataSource.getLastRemoteKey(state)
+                val remoteKeys = getLastRemoteKey(state)
                 val nextKey = remoteKeys?.nextKey
                 return nextKey ?: MediatorResult.Success(endOfPaginationReached = false)
             }
             LoadType.PREPEND -> {
-                val remoteKeys = localDataSource.getFirstRemoteKey(state)
+                val remoteKeys = getFirstRemoteKey(state)
                 remoteKeys?.prevKey ?: return MediatorResult.Success(
                     endOfPaginationReached = false
                 )
             }
         }
+    }
+
+    private suspend fun getRemoteKeyClosestToCurrentPosition(state: PagingState<Int, ProductEntity>): RemoteKey? {
+        return state.anchorPosition?.let { position ->
+            state.closestItemToPosition(position)?.uuid?.let { repoId ->
+                localDataSource.getRemoteKeyById(repoId)
+            }
+        }
+    }
+
+    private suspend fun getLastRemoteKey(state: PagingState<Int, ProductEntity>): RemoteKey? {
+        return state.pages
+            .lastOrNull { it.data.isNotEmpty() }
+            ?.data?.lastOrNull()
+            ?.let { product -> localDataSource.getRemoteKeyById(product.uuid) }
+    }
+
+    private suspend fun getFirstRemoteKey(state: PagingState<Int, ProductEntity>): RemoteKey? {
+        return state.pages
+            .firstOrNull { it.data.isNotEmpty() }
+            ?.data?.firstOrNull()
+            ?.let { product -> localDataSource.getRemoteKeyById(product.uuid) }
     }
 }

@@ -9,7 +9,9 @@ import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.databinding.ItemProductBinding
 import com.amd.efishery.assignment.utils.toRp
 
-class ProductAdapter :
+class ProductAdapter(
+    private val onDeleteItem: ((ProductEntity) -> Unit)? = null
+) :
     PagingDataAdapter<ProductEntity, ProductAdapter.ViewHolder>(DiffUtilCallBack) {
 
     inner class ViewHolder(private val binding: ItemProductBinding) :
@@ -21,6 +23,9 @@ class ProductAdapter :
                 txtProductSize.text = item.size + "Kg"
                 txtProductPrice.text = item.price?.toRp()
                 txtProductProvince.text = item.areaKota
+                btnDelete.setOnClickListener {
+                    onDeleteItem?.invoke(item)
+                }
             }
         }
 

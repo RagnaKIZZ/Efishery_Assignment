@@ -1,10 +1,14 @@
 package com.amd.efishery.assignment.di
 
+import android.content.Context
 import com.amd.efishery.assignment.BuildConfig
 import com.amd.efishery.assignment.data.remote.ApiService
+import com.amd.efishery.assignment.utils.NetworkAwareHandler
+import com.amd.efishery.assignment.utils.NetworkHandlerImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -47,6 +51,12 @@ class NetworkModule {
     @Provides
     internal fun provideService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    internal fun provideConnectionStatus(@ApplicationContext context: Context): NetworkHandlerImpl {
+        return NetworkHandlerImpl(context)
     }
 
 }

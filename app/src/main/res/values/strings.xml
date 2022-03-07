@@ -6,4 +6,12 @@
     <string name="select_city">Pilih Kota</string>
     <string name="select_size">Pilih Ukuran</string>
     <string name="add">Tambah</string>
+    <string name="input_price">Masukan Harga</string>
+    <string name="required">Harus diisi!</string>
+    <string name="success_add_data">Berhasil menambahkan produk!</string>
+    <string name="failed_to_added_product">Gagal menambahkan produk!</string>
+    <string name="success_delete_product">Berhasil menghapus produk</string>
+    <string name="success_update_product">Berhasil update produk</string>
+    <string name="failed_to_delete_product">Gagal menghapus produk</string>
+    <string name="failed_to_update_product">Gagal update produk</string>
 </resources>

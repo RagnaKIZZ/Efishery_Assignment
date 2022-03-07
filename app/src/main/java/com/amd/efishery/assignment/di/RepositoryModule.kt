@@ -8,6 +8,7 @@ import com.amd.efishery.assignment.data.local.LocalDb
 import com.amd.efishery.assignment.data.remote.ApiService
 import com.amd.efishery.assignment.data.remote.RemoteDataSource
 import com.amd.efishery.assignment.data.remote.RemoteDataSourceImpl
+import com.amd.efishery.assignment.utils.NetworkAwareHandler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,19 +36,25 @@ class RepositoryModule {
     @Singleton
     @Provides
     internal fun provideLocalDataSource(
-        localDb: LocalDb,
-        dispatcherThread: DispatcherThread
+        localDb: LocalDb
     ): LocalDataSourceImpl {
-        return LocalDataSourceImpl(localDb, dispatcherThread)
+        return LocalDataSourceImpl(localDb)
     }
 
     @Singleton
     @Provides
     internal fun provideRepository(
         localDataSource: LocalDataSource,
-        remoteDataSource: RemoteDataSource
+        remoteDataSource: RemoteDataSource,
+        networkAwareHandler: NetworkAwareHandler,
+        dispatcherThread: DispatcherThread
     ): EfisheryRepositoryImpl {
-        return EfisheryRepositoryImpl(localDataSource, remoteDataSource)
+        return EfisheryRepositoryImpl(
+            localDataSource,
+            remoteDataSource,
+            networkAwareHandler,
+            dispatcherThread
+        )
     }
 
 }

@@ -7,14 +7,18 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.amd.efishery.assignment.R
+import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.databinding.ActivityDashboardBinding
 import com.amd.efishery.assignment.presentation.dashboard.adapter.ProductAdapter
-import com.amd.efishery.assignment.utils.PagingLoadStateAdapter
+import com.amd.efishery.assignment.presentation.dialog.BottomSheetAddProduct
+import com.amd.efishery.assignment.utils.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class DashboardActivity : AppCompatActivity() {
@@ -22,20 +26,55 @@ class DashboardActivity : AppCompatActivity() {
     private val binding by lazy { ActivityDashboardBinding.inflate(layoutInflater) }
     private val viewModel: DashboardViewModel by viewModels()
 
-    private val productAdapter by lazy { ProductAdapter() }
+    private val productAdapter by lazy {
+        ProductAdapter {
+            deleteItem(it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setupUiState()
+        setupUi()
         pagingSetup()
         observer()
     }
 
+    private fun setupUi() {
+        binding.btnAddProduct.setOnClickListener {
+            BottomSheetAddProduct { item ->
+                logging(item.toString())
+                viewModel.createProduct(item)
+            }.show(supportFragmentManager, Constants.BOTTOMSHEET_PRODUCT_ADD)
+        }
+        binding.swipeRefresh.setOnRefreshListener {
+            productAdapter.refresh()
+        }
+    }
+
     private fun observer() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.getProduct().collectLatest {
-                productAdapter.submitData(it)
+        viewModel.apply {
+            lifecycleScope.launchWhenStarted {
+                viewModel.getProduct().collectLatest {
+                    productAdapter.submitData(it)
+                }
+            }
+
+            lifecycleScope.launch {
+                stateLoading.collectLatest {
+                    binding.linearProgressBar.isVisible = it
+                }
+            }
+
+            lifecycleScope.launch {
+                stateActionProduct.collectLatest {
+                    if (it.first && it.second != TypeProductAction.DELETE) {
+                        productAdapter.refresh()
+                    }
+
+                    showToast(messageSuccessAction(it))
+                }
             }
         }
     }
@@ -59,7 +98,8 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun setupUiState() {
         productAdapter.addLoadStateListener { loadState ->
-            binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
+            binding.swipeRefresh.isRefreshing =
+                loadState.source.refresh is LoadState.Loading && productAdapter.itemCount == 0
             val errorState = when {
                 loadState.append is LoadState.Error -> loadState.append as LoadState.Error
                 loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
@@ -67,6 +107,27 @@ class DashboardActivity : AppCompatActivity() {
                 else -> null
             }
             errorState?.error?.printStackTrace()
+        }
+    }
+
+    private fun deleteItem(productEntity: ProductEntity) {
+        showAlertDialog(
+            "Hapus Produk",
+            "Apa Anda yakin ingin menghapus ${productEntity.komoditas}?"
+        ) {
+            viewModel.deleteProduct(productEntity.uuid)
+        }
+    }
+
+    private fun messageSuccessAction(param: Pair<Boolean, TypeProductAction>): String {
+        return when {
+            param.first && param.second == TypeProductAction.CREATE -> getString(R.string.success_add_data)
+            param.first && param.second == TypeProductAction.DELETE -> getString(R.string.success_delete_product)
+            param.first && param.second == TypeProductAction.UPDATE -> getString(R.string.success_update_product)
+            !param.first && param.second == TypeProductAction.CREATE -> getString(R.string.failed_to_added_product)
+            !param.first && param.second == TypeProductAction.DELETE -> getString(R.string.failed_to_delete_product)
+            !param.first && param.second == TypeProductAction.UPDATE -> getString(R.string.failed_to_update_product)
+            else -> ""
         }
     }
 }

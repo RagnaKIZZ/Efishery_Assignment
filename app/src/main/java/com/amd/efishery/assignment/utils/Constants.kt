@@ -6,4 +6,6 @@ object Constants {
     const val INITIAL_OFFSET_PAGE = 0
     const val END_OFFSET_PAGE = 100
 
+    const val BOTTOMSHEET_PRODUCT_ADD = "bottomsheet_product_add"
+
 }

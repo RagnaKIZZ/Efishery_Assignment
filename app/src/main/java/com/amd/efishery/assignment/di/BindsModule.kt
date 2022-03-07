@@ -6,6 +6,8 @@ import com.amd.efishery.assignment.data.local.LocalDataSourceImpl
 import com.amd.efishery.assignment.data.remote.RemoteDataSource
 import com.amd.efishery.assignment.data.remote.RemoteDataSourceImpl
 import com.amd.efishery.assignment.domain.EfisheryRepository
+import com.amd.efishery.assignment.utils.NetworkAwareHandler
+import com.amd.efishery.assignment.utils.NetworkHandlerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,5 +28,8 @@ abstract class BindsModule {
 
     @Binds
     abstract fun provideDispatcher(dispatcher: DispatcherProvider): DispatcherThread
+
+    @Binds
+    abstract fun provideNetworkAware(networkHandlerImpl: NetworkHandlerImpl): NetworkAwareHandler
 
 }
