@@ -3,21 +3,26 @@ package com.amd.efishery.assignment.data.remote
 import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
 import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
-import com.amd.efishery.assignment.data.remote.model.product.DeleteProductParams
-import com.amd.efishery.assignment.data.remote.model.product.ProductItem
-import com.amd.efishery.assignment.data.remote.model.product.SuccessCreate
+import com.amd.efishery.assignment.data.remote.model.product.*
 import com.amd.efishery.assignment.data.remote.model.size.OptionSize
 import com.amd.efishery.assignment.di.DispatcherThread
 import com.amd.efishery.assignment.domain.mapper.toEntity
+import com.amd.efishery.assignment.utils.logging
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 interface RemoteDataSource {
-    suspend fun getProducts(limit: Int = 10, offset: Int = 0): List<ProductEntity>
+    suspend fun getProducts(
+        limit: Int = 10,
+        offset: Int = 0,
+        search: SearchProductParam?
+    ): List<ProductEntity>
+
     suspend fun insertProduct(body: ProductItem): Boolean
     suspend fun deleteProduct(body: DeleteProductParams): Boolean
+    suspend fun updateProduct(body: UpdateProductParams): Boolean
     suspend fun getSizes(): List<OptionSizeEntity>
     suspend fun getAreas(): List<OptionAreaEntity>
 }
@@ -27,10 +32,14 @@ class RemoteDataSourceImpl @Inject constructor(
     private val dispatcher: DispatcherThread
 ) : RemoteDataSource {
 
-    override suspend fun getProducts(limit: Int, offset: Int): List<ProductEntity> {
+    override suspend fun getProducts(
+        limit: Int,
+        offset: Int,
+        search: SearchProductParam?
+    ): List<ProductEntity> {
         val products = mutableListOf<ProductEntity>()
         try {
-            flowOf(apiService.getProducts(limit, offset))
+            flowOf(apiService.getProducts(limit, offset, search?.let { Gson().toJson(it) } ?: ""))
                 .flowOn(dispatcher.io)
                 .catch { e ->
                     e.printStackTrace()
@@ -71,6 +80,23 @@ class RemoteDataSourceImpl @Inject constructor(
                     e.printStackTrace()
                 }.collectLatest {
                     status = it.clearedRowsCount ?: 0 > 0
+                }
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        return status
+    }
+
+    override suspend fun updateProduct(body: UpdateProductParams): Boolean {
+        var status = false
+        try {
+            flowOf(apiService.updateProduct(body)).catch { e ->
+                e.printStackTrace()
+            }.flowOn(dispatcher.io)
+                .catch { e ->
+                    e.printStackTrace()
+                }.collectLatest {
+                    status = it.totalUpdatedRows ?: 0 > 0
                 }
         } catch (e: Throwable) {
             e.printStackTrace()

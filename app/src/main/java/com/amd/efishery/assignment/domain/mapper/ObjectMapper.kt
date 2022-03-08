@@ -4,7 +4,10 @@ import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
 import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.data.remote.model.area.OptionArea
+import com.amd.efishery.assignment.data.remote.model.product.Condition
 import com.amd.efishery.assignment.data.remote.model.product.ProductItem
+import com.amd.efishery.assignment.data.remote.model.product.Set
+import com.amd.efishery.assignment.data.remote.model.product.UpdateProductParams
 import com.amd.efishery.assignment.data.remote.model.size.OptionSize
 import java.util.*
 
@@ -28,6 +31,14 @@ fun ProductEntity.toResponse() = ProductItem(
     areaKota = this.areaKota,
     tglParsed = this.tglParsed,
     timestamp = this.timestamp
+)
+
+fun ProductItem.toUpdateParam() = UpdateProductParams(
+    Condition(
+        uuid = this.uuid
+    ),
+    Set(size, price, komoditas, areaProvinsi, areaKota),
+    limit = 1
 )
 
 fun OptionSize.toEntity() = OptionSizeEntity(

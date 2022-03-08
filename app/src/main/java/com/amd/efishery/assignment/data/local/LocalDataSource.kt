@@ -7,16 +7,20 @@ import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
 import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.data.local.entity.RemoteKey
+import com.amd.efishery.assignment.data.remote.model.product.SearchProductParam
 import com.amd.efishery.assignment.di.DispatcherThread
 import com.amd.efishery.assignment.utils.Constants
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 interface LocalDataSource {
     //get product
-    suspend fun insertDataToCache(list: List<ProductEntity>, offset: Int, isRefresh: Boolean)
+    suspend fun insertDataToCache(searchProductParam: SearchProductParam?, list: List<ProductEntity>, offset: Int, isRefresh: Boolean)
     suspend fun getRemoteKeyById(uuid: String): RemoteKey?
     fun getProductPaging(): PagingSource<Int, ProductEntity>
     suspend fun deleteProductItem(uuid: String)
+    suspend fun updateProductItem(productEntity: ProductEntity)
 
     //size
     suspend fun insertSize(list: List<OptionSizeEntity>)
@@ -25,7 +29,7 @@ interface LocalDataSource {
     //area
     suspend fun insertArea(list: List<OptionAreaEntity>)
     suspend fun getArea(): List<OptionAreaEntity>
-    suspend fun getAreaByProvince(province: String) : List<OptionAreaEntity>
+    suspend fun getAreaByProvince(province: String): List<OptionAreaEntity>
 }
 
 class LocalDataSourceImpl @Inject constructor(
@@ -37,14 +41,19 @@ class LocalDataSourceImpl @Inject constructor(
     }
 
     override suspend fun insertDataToCache(
+        searchProductParam: SearchProductParam?,
         list: List<ProductEntity>,
         offset: Int,
         isRefresh: Boolean
     ) {
         database.withTransaction {
             if (isRefresh) {
-                database.productDao().deleteProduct()
-                database.remoteKeyDao().deleteAll()
+                searchProductParam?.let {
+
+                } ?: kotlin.run {
+                    database.productDao().deleteProduct()
+                    database.remoteKeyDao().deleteAll()
+                }
             }
             val prevKey = if (offset == Constants.INITIAL_OFFSET_PAGE) null else offset - 10
             val nextKey = if (list.isEmpty()) null else offset + 10
@@ -90,5 +99,21 @@ class LocalDataSourceImpl @Inject constructor(
 
     override suspend fun deleteProductItem(uuid: String) {
         database.productDao().deleteProduct(uuid)
+    }
+
+    override suspend fun updateProductItem(productEntity: ProductEntity) {
+        database.productDao().updateProduct(
+            productEntity.uuid,
+            productEntity.komoditas ?: "",
+            productEntity.size ?: "0",
+            productEntity.price ?: "0",
+            productEntity.areaProvinsi ?: "",
+            productEntity.areaKota ?: "",
+            SimpleDateFormat(
+                Constants.DEFAULT_DATE_FORMAT,
+                Locale.US
+            ).format(Date()),
+            Date().time.toString()
+        )
     }
 }

@@ -8,4 +8,6 @@ object Constants {
 
     const val BOTTOMSHEET_PRODUCT_ADD = "bottomsheet_product_add"
 
+    const val DEFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'.000Z'"
+
 }

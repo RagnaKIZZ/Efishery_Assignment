@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.amd.efishery.assignment.R
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.databinding.ActivityDashboardBinding
+import com.amd.efishery.assignment.domain.mapper.toEntity
 import com.amd.efishery.assignment.presentation.dashboard.adapter.ProductAdapter
 import com.amd.efishery.assignment.presentation.dialog.BottomSheetAddProduct
 import com.amd.efishery.assignment.utils.*
@@ -27,9 +28,14 @@ class DashboardActivity : AppCompatActivity() {
     private val viewModel: DashboardViewModel by viewModels()
 
     private val productAdapter by lazy {
-        ProductAdapter {
-            deleteItem(it)
-        }
+        ProductAdapter(
+            {
+                updateItem(it)
+            },
+            {
+                deleteItem(it)
+            }
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,10 +49,7 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun setupUi() {
         binding.btnAddProduct.setOnClickListener {
-            BottomSheetAddProduct { item ->
-                logging(item.toString())
-                viewModel.createProduct(item)
-            }.show(supportFragmentManager, Constants.BOTTOMSHEET_PRODUCT_ADD)
+            showDialogProduct(true)
         }
         binding.swipeRefresh.setOnRefreshListener {
             productAdapter.refresh()
@@ -56,7 +59,7 @@ class DashboardActivity : AppCompatActivity() {
     private fun observer() {
         viewModel.apply {
             lifecycleScope.launchWhenStarted {
-                viewModel.getProduct().collectLatest {
+                viewModel.stateListProduct.collectLatest {
                     productAdapter.submitData(it)
                 }
             }
@@ -72,7 +75,6 @@ class DashboardActivity : AppCompatActivity() {
                     if (it.first && it.second != TypeProductAction.DELETE) {
                         productAdapter.refresh()
                     }
-
                     showToast(messageSuccessAction(it))
                 }
             }
@@ -117,6 +119,21 @@ class DashboardActivity : AppCompatActivity() {
         ) {
             viewModel.deleteProduct(productEntity.uuid)
         }
+    }
+
+    private fun updateItem(productEntity: ProductEntity) {
+        showDialogProduct(false, productEntity)
+    }
+
+    private fun showDialogProduct(isCreate: Boolean, productEntity: ProductEntity? = null) {
+        BottomSheetAddProduct(productEntity) { item ->
+            logging(item.toString())
+            if (isCreate) {
+                viewModel.createProduct(item)
+            } else {
+                viewModel.updateProduct(item.toEntity())
+            }
+        }.show(supportFragmentManager, Constants.BOTTOMSHEET_PRODUCT_ADD)
     }
 
     private fun messageSuccessAction(param: Pair<Boolean, TypeProductAction>): String {

@@ -11,8 +11,10 @@ import androidx.lifecycle.lifecycleScope
 import com.amd.efishery.assignment.R
 import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
 import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
+import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.data.remote.model.product.ProductItem
 import com.amd.efishery.assignment.databinding.BottomSheetAddProductBinding
+import com.amd.efishery.assignment.utils.Constants
 import com.amd.efishery.assignment.utils.listenError
 import com.amd.efishery.assignment.utils.validateField
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -26,6 +28,7 @@ import java.util.*
 
 @AndroidEntryPoint
 class BottomSheetAddProduct(
+    private val productEntity: ProductEntity? = null,
     private val onCreateOrder: ((ProductItem) -> Unit)? = null
 ) : BottomSheetDialogFragment() {
 
@@ -58,6 +61,15 @@ class BottomSheetAddProduct(
             edtSize.listenError()
             btnAddProduct.setOnClickListener {
                 createProduct()
+            }
+
+            productEntity?.let { item ->
+                edtProductName.setText(item.komoditas.toString())
+                edtProductPrice.setText(item.price ?: "0")
+                edtSize.setText(item.size ?: "0")
+                edtProvince.setText(item.areaProvinsi)
+                edtCity.setText(item.areaKota)
+                btnAddProduct.text = "Update"
             }
         }
     }
@@ -159,14 +171,14 @@ class BottomSheetAddProduct(
 
             onCreateOrder?.invoke(
                 ProductItem(
-                    uuid = UUID.randomUUID().toString(),
+                    uuid = productEntity?.uuid ?: UUID.randomUUID().toString(),
                     komoditas = edtProductName.text.toString(),
                     size = edtSize.text.toString(),
                     price = edtProductPrice.text.toString(),
                     areaProvinsi = edtProvince.text.toString(),
                     areaKota = edtCity.text.toString(),
                     tglParsed = SimpleDateFormat(
-                        "yyyy-MM-dd'T'HH:mm:ss'.000Z'",
+                        Constants.DEFAULT_DATE_FORMAT,
                         Locale.US
                     ).format(Date()),
                     timestamp = Date().time.toString()

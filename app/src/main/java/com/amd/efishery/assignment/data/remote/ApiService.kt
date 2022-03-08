@@ -12,7 +12,8 @@ interface ApiService {
     @GET(Url.LIST)
     suspend fun getProducts(
         @Query("limit") limit: Int,
-        @Query("offset") offset: Int
+        @Query("offset") offset: Int,
+        @Query("search") params: String
     ): List<ProductItem>
 
     @GET(Url.LIST)

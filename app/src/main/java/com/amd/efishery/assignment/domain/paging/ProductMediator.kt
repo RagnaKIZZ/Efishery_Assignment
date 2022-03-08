@@ -8,6 +8,7 @@ import com.amd.efishery.assignment.data.local.LocalDataSource
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.data.local.entity.RemoteKey
 import com.amd.efishery.assignment.data.remote.RemoteDataSource
+import com.amd.efishery.assignment.data.remote.model.product.SearchProductParam
 import com.amd.efishery.assignment.domain.mapper.toEntity
 import com.amd.efishery.assignment.utils.Constants
 import com.amd.efishery.assignment.utils.logging
@@ -16,6 +17,7 @@ import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
 class ProductMediator(
+    private val searchProductParam: SearchProductParam? = null,
     private val localDataSource: LocalDataSource,
     private val remoteDataSource: RemoteDataSource
 ) : RemoteMediator<Int, ProductEntity>() {
@@ -25,6 +27,7 @@ class ProductMediator(
         state: PagingState<Int, ProductEntity>
     ): MediatorResult {
         return try {
+            logging(searchProductParam.toString())
             logging(loadType.name)
             val offset = when (val pageKeyData = getKeyLimitData(loadType, state)) {
                 is MediatorResult.Success -> {
@@ -37,10 +40,12 @@ class ProductMediator(
 
             val response = remoteDataSource.getProducts(
                 Constants.DEFAULT_SIZE_PAGE,
-                offset
+                offset,
+                searchProductParam
             )
 
             localDataSource.insertDataToCache(
+                searchProductParam,
                 response,
                 offset,
                 loadType == LoadType.REFRESH
@@ -62,13 +67,15 @@ class ProductMediator(
     ): Any {
         return when (loadType) {
             LoadType.REFRESH -> {
-                val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-                remoteKeys?.nextKey?.minus(10) ?: Constants.INITIAL_OFFSET_PAGE
+//                val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
+//                remoteKeys?.nextKey?.minus(10) ?: Constants.INITIAL_OFFSET_PAGE
+                0
             }
             LoadType.APPEND -> {
-                val remoteKeys = getLastRemoteKey(state)
-                val nextKey = remoteKeys?.nextKey
-                return nextKey ?: MediatorResult.Success(endOfPaginationReached = false)
+//                val remoteKeys = getLastRemoteKey(state)
+//                val nextKey = remoteKeys?.nextKey
+//                return nextKey ?:
+                return MediatorResult.Success(endOfPaginationReached = false)
             }
             LoadType.PREPEND -> {
                 val remoteKeys = getFirstRemoteKey(state)

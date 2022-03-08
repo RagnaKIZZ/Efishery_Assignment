@@ -10,6 +10,7 @@ import com.amd.efishery.assignment.databinding.ItemProductBinding
 import com.amd.efishery.assignment.utils.toRp
 
 class ProductAdapter(
+    private val onDetailItem: ((ProductEntity) -> Unit)? = null,
     private val onDeleteItem: ((ProductEntity) -> Unit)? = null
 ) :
     PagingDataAdapter<ProductEntity, ProductAdapter.ViewHolder>(DiffUtilCallBack) {
@@ -25,6 +26,9 @@ class ProductAdapter(
                 txtProductProvince.text = item.areaKota
                 btnDelete.setOnClickListener {
                     onDeleteItem?.invoke(item)
+                }
+                root.setOnClickListener {
+                    onDetailItem?.invoke(item)
                 }
             }
         }

@@ -8,12 +8,12 @@ import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
 import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
 import com.amd.efishery.assignment.data.remote.RemoteDataSource
-import com.amd.efishery.assignment.data.remote.model.product.Condition
-import com.amd.efishery.assignment.data.remote.model.product.DeleteProductParams
-import com.amd.efishery.assignment.data.remote.model.product.ProductItem
-import com.amd.efishery.assignment.data.remote.model.product.SuccessCreate
+import com.amd.efishery.assignment.data.remote.model.product.*
 import com.amd.efishery.assignment.di.DispatcherThread
 import com.amd.efishery.assignment.domain.EfisheryRepository
+import com.amd.efishery.assignment.domain.mapper.toEntity
+import com.amd.efishery.assignment.domain.mapper.toResponse
+import com.amd.efishery.assignment.domain.mapper.toUpdateParam
 import com.amd.efishery.assignment.domain.paging.ProductMediator
 import com.amd.efishery.assignment.utils.NetworkAwareHandler
 import kotlinx.coroutines.flow.catch
@@ -30,10 +30,10 @@ class EfisheryRepositoryImpl @Inject constructor(
 ) : EfisheryRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override suspend fun getProducts(): Pager<Int, ProductEntity> {
+    override suspend fun getProducts(param: SearchProductParam?): Pager<Int, ProductEntity> {
         return Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = true),
-            remoteMediator = ProductMediator(localDataSource, remoteDataSource)
+            remoteMediator = ProductMediator(param, localDataSource, remoteDataSource)
         ) {
             localDataSource.getProductPaging()
         }
@@ -54,6 +54,15 @@ class EfisheryRepositoryImpl @Inject constructor(
             )
         ) {
             localDataSource.deleteProductItem(uuid)
+            true
+        } else {
+            false
+        }
+    }
+
+    override suspend fun updateProduct(param: ProductEntity): Boolean {
+        return if (remoteDataSource.updateProduct(param.toResponse().toUpdateParam())) {
+            localDataSource.updateProductItem(param)
             true
         } else {
             false
