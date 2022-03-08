@@ -35,7 +35,7 @@ class EfisheryRepositoryImpl @Inject constructor(
             config = PagingConfig(pageSize = 10, enablePlaceholders = true),
             remoteMediator = ProductMediator(param, localDataSource, remoteDataSource)
         ) {
-            localDataSource.getProductPaging()
+            localDataSource.getProductPaging(param)
         }
     }
 

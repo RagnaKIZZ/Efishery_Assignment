@@ -1,14 +1,22 @@
 package com.amd.efishery.assignment.presentation.dashboard
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.amd.efishery.assignment.R
+import com.amd.efishery.assignment.data.local.entity.OptionAreaEntity
+import com.amd.efishery.assignment.data.local.entity.OptionSizeEntity
 import com.amd.efishery.assignment.data.local.entity.ProductEntity
+import com.amd.efishery.assignment.data.remote.model.product.SearchProductParam
 import com.amd.efishery.assignment.databinding.ActivityDashboardBinding
 import com.amd.efishery.assignment.domain.mapper.toEntity
 import com.amd.efishery.assignment.presentation.dashboard.adapter.ProductAdapter
@@ -60,7 +68,7 @@ class DashboardActivity : AppCompatActivity() {
         viewModel.apply {
             lifecycleScope.launchWhenStarted {
                 viewModel.stateListProduct.collectLatest {
-                    productAdapter.submitData(it)
+                    productAdapter.submitData(lifecycle, it)
                 }
             }
 
@@ -76,6 +84,24 @@ class DashboardActivity : AppCompatActivity() {
                         productAdapter.refresh()
                     }
                     showToast(messageSuccessAction(it))
+                }
+            }
+
+            lifecycleScope.launchWhenResumed {
+                stateGetSize.collectLatest {
+                    setupSize(it)
+                }
+            }
+
+            lifecycleScope.launchWhenResumed {
+                stateGetProvince.collectLatest {
+                    setupProvince(it)
+                }
+            }
+
+            lifecycleScope.launchWhenResumed {
+                stateGetCity.collectLatest {
+                    setupCity(it)
                 }
             }
         }
@@ -147,4 +173,61 @@ class DashboardActivity : AppCompatActivity() {
             else -> ""
         }
     }
+
+    private fun setupSize(list: List<OptionSizeEntity>) {
+        binding.edtSize.setAdapter(
+            ArrayAdapter(this, R.layout.item_dropdown, list.map { it.size })
+        )
+    }
+
+    private fun setupProvince(list: List<OptionAreaEntity>) {
+        binding.edtProvince.setAdapter(
+            ArrayAdapter(
+                this,
+                R.layout.item_dropdown,
+                list.map { it.province?.uppercase() }.toSet().toList()
+            )
+        )
+        binding.edtProvince.addTextChangedListener {
+            binding.edtCity.setText("")
+            binding.edtProvince.error = null
+            viewModel.getAreaByProvince(it.toString())
+        }
+    }
+
+    private fun setupCity(list: List<OptionAreaEntity>) {
+        binding.edtCity.setAdapter(
+            ArrayAdapter(
+                this,
+                R.layout.item_dropdown,
+                list.map { it.city.uppercase() }.toSet().toList()
+            )
+        )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_search, menu)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchView.clearFocus()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                binding.rvProduct.scrollToPosition(0)
+                viewModel.searchProduct(
+                    if (newText.isNullOrEmpty()) null else SearchProductParam(
+                        komoditas = newText
+                    )
+                )
+                return true
+            }
+        })
+        return super.onCreateOptionsMenu(menu)
+    }
+
 }

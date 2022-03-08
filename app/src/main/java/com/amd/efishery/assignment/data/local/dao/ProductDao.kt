@@ -25,6 +25,9 @@ interface ProductDao {
     @Query("SELECT * FROM productentity")
     fun getProductListPaged(): PagingSource<Int, ProductEntity>
 
+    @Query("SELECT * FROM productentity WHERE komoditas LIKE :name")
+    fun getProductListPaged(name: String): PagingSource<Int, ProductEntity>
+
     @Query("SELECT COUNT(*) FROM productentity")
     suspend fun getTotalItem(): Int
 

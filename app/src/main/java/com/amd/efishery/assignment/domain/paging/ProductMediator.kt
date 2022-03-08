@@ -67,15 +67,14 @@ class ProductMediator(
     ): Any {
         return when (loadType) {
             LoadType.REFRESH -> {
-//                val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-//                remoteKeys?.nextKey?.minus(10) ?: Constants.INITIAL_OFFSET_PAGE
-                0
+                val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
+                if (searchProductParam == null) remoteKeys?.nextKey?.minus(10)
+                    ?: Constants.INITIAL_OFFSET_PAGE else 0
             }
             LoadType.APPEND -> {
-//                val remoteKeys = getLastRemoteKey(state)
-//                val nextKey = remoteKeys?.nextKey
-//                return nextKey ?:
-                return MediatorResult.Success(endOfPaginationReached = false)
+                val remoteKeys = getLastRemoteKey(state)
+                val nextKey = remoteKeys?.nextKey
+                return nextKey ?: MediatorResult.Success(endOfPaginationReached = false)
             }
             LoadType.PREPEND -> {
                 val remoteKeys = getFirstRemoteKey(state)

@@ -16,9 +16,15 @@ import javax.inject.Inject
 
 interface LocalDataSource {
     //get product
-    suspend fun insertDataToCache(searchProductParam: SearchProductParam?, list: List<ProductEntity>, offset: Int, isRefresh: Boolean)
+    suspend fun insertDataToCache(
+        searchProductParam: SearchProductParam?,
+        list: List<ProductEntity>,
+        offset: Int,
+        isRefresh: Boolean
+    )
+
     suspend fun getRemoteKeyById(uuid: String): RemoteKey?
-    fun getProductPaging(): PagingSource<Int, ProductEntity>
+    fun getProductPaging(param: SearchProductParam?): PagingSource<Int, ProductEntity>
     suspend fun deleteProductItem(uuid: String)
     suspend fun updateProductItem(productEntity: ProductEntity)
 
@@ -65,8 +71,9 @@ class LocalDataSourceImpl @Inject constructor(
         }
     }
 
-    override fun getProductPaging(): PagingSource<Int, ProductEntity> {
-        return database.productDao().getProductListPaged()
+    override fun getProductPaging(param: SearchProductParam?): PagingSource<Int, ProductEntity> {
+        return param?.let { database.productDao().getProductListPaged(it.komoditas.toString()) }
+            ?: database.productDao().getProductListPaged()
     }
 
     //size
